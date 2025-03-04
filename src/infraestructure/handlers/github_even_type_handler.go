@@ -27,7 +27,7 @@ func handleGithubPullRequestEvent(ctx *gin.Context, payload []byte) {
 		"Evento Pull Request recibido: Acción=%s, PR Título='%s', Rama Base='%s', Repositorio='%s'",
 		eventPayload.Action, eventPayload.PullRequest.Title, eventPayload.PullRequest.Base.Ref, eventPayload.Repository.FullName)
 
-	mainBranch := "develop"
+	mainBranch := "feature"
 
 	if eventPayload.PullRequest.Base.Ref == mainBranch {
 		log.Printf("¡Pull Request a la rama '%s' detectado en el repositorio '%s'!", mainBranch, eventPayload.Repository.FullName)
