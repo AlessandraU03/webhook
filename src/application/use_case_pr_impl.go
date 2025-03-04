@@ -59,46 +59,4 @@ func ProcessPullRequest(payload []byte) int {
     return 200
 }
 
-func ProcessCommentEvent(payload []byte) int {
-    type CommentEventPayload struct {
-        Action  string `json:"action"`
-        Comment struct {
-            Body string `json:"body"`
-            User struct {
-                Login string `json:"login"`
-            } `json:"user"`
-        } `json:"comment"`
-        Issue struct {
-            PullRequest struct {
-                URL string `json:"url"`
-            } `json:"pull_request"`
-        } `json:"issue"`
-    }
-
-    var eventPayload CommentEventPayload
-
-    if err := json.Unmarshal(payload, &eventPayload); err != nil {
-        log.Printf("Error al deserializar payload de comentario: %v", err)
-        return 400
-    }
-
-    if eventPayload.Action != "created" {
-        log.Printf("Comentario no es nuevo: %s", eventPayload.Action)
-        return 400
-    }
-
-    user := eventPayload.Comment.User.Login
-    comment := eventPayload.Comment.Body
-    prURL := eventPayload.Issue.PullRequest.URL
-
-    message := "**Nuevo Comentario en Pull Request**\n" +
-        "👤 **Usuario:** " + user + "\n" +
-        "💬 **Comentario:** " + comment + "\n" +
-        "🔗 **URL del PR:** " + prURL
-
-    log.Println("Enviando comentario a Discord...")
-    sendToDiscord(message)
-
-    return 200
-}
 
