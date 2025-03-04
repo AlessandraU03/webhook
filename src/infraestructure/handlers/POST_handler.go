@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"webhook/src/application"
 	"log"
 	"net/http"
 
@@ -12,7 +13,9 @@ func PullRequestEvent(ctx *gin.Context) {
 	deliveryID := ctx.GetHeader("X-GitHub-Delivery")
 	signature := ctx.GetHeader("X-Hub-Signature-256")
 
-	log.Printf("Webhook recibido: Evento=%s, DeliveryID=%s, Firma=%s", eventType, deliveryID, signature)
+	log.Println(signature)
+
+	log.Printf("Webhook recibido: \nEvento=%s, \nDeliveryID=%s", eventType, deliveryID)
 
 	payload, err := ctx.GetRawData()
 
@@ -22,10 +25,21 @@ func PullRequestEvent(ctx *gin.Context) {
 		return
 	}
 
+	var statusCode int
+
 	switch eventType {
-	case "ping":
-		handleGithubPingEvent(ctx)
 	case "pull_request":
-		handleGithubPullRequestEvent(ctx, payload)
+		statusCode = application.ProcessPullRequest(payload)
 	}
+
+	switch statusCode {
+	case 200:
+		ctx.JSON(http.StatusOK, gin.H{"status": "Evento Pull Request recibido y procesado"})
+	case 500:
+		log.Printf("Error al deserializar el payload del pull request: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Error al procesar el payload del pull request"})
+	default:
+		ctx.JSON(http.StatusOK, gin.H{"status": "Peticion procesada"})
+	}
+
 }
