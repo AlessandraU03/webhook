@@ -8,7 +8,15 @@ import (
 	"os"
 )
 
-func sendToDiscord(webhookURL, message string) {
+// Variables de entorno para los webhooks
+var (
+	discordWebhookDesarrollo = os.Getenv("DISCORD_WEBHOOK_DESARROLLO")
+	discordWebhookPruebas    = os.Getenv("DISCORD_WEBHOOK_PRUEBAS")
+	discordWebhookGeneral    = os.Getenv("DISCORD_WEBHOOK_GENERAL")
+)
+
+// Función para enviar mensaje a Discord
+func SendToDiscord(webhookURL, message string) {
 	if webhookURL == "" {
 		log.Println("❌ No se ha configurado la URL del webhook.")
 		return
@@ -30,10 +38,3 @@ func sendToDiscord(webhookURL, message string) {
 
 	log.Printf("✅ Respuesta de Discord: %v", resp.Status)
 }
-
-// Carga las URLs desde las variables de entorno
-var (
-	discordWebhookDesarrollo = os.Getenv("DISCORD_WEBHOOK_DESARROLLO")
-	discordWebhookPruebas    = os.Getenv("DISCORD_WEBHOOK_PRUEBAS")
-	discordWebhookGeneral    = os.Getenv("DISCORD_WEBHOOK_GENERAL")
-)
