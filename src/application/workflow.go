@@ -7,7 +7,7 @@ import (
 	domain "webhook/src/domain/value_objects"
 )
 
-// ProcessWorkflowEvent maneja los eventos de ejecución de workflows
+// Función que procesa los eventos de Workflow
 func ProcessWorkflowEvent(payload []byte) int {
 	var eventPayload domain.WorkflowRunEventPayload
 
@@ -20,6 +20,7 @@ func ProcessWorkflowEvent(payload []byte) int {
 	return 200
 }
 
+// Función que maneja la notificación de Workflow
 func handleWorkflowRun(eventPayload domain.WorkflowRunEventPayload) {
 	status := eventPayload.WorkflowRun.Status
 	conclusion := eventPayload.WorkflowRun.Conclusion
@@ -32,5 +33,11 @@ func handleWorkflowRun(eventPayload domain.WorkflowRunEventPayload) {
 		repo, name, status, conclusion, url,
 	)
 
-	sendToDiscord(discordWebhookPruebas, message)
+	// Enviar la notificación al webhook de pruebas
+	if discordWebhookPruebas == "" {
+		log.Println("❌ URL del webhook de pruebas no configurada.")
+		return
+	}
+
+	SendToDiscord(discordWebhookPruebas, message)
 }
