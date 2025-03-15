@@ -37,6 +37,10 @@ func handlePullRequest(eventPayload domain.PullRequestEventPayload) {
 		log.Println("❌ URL del webhook de desarrollo no configurada.")
 		return
 	}
+    
+    const discordWebhookDesarrollo = "https://discord.com/api/webhooks/1350529029412749333/BF36oJ78qT91HQ_NZB46CuwNCpKenRjo0CgVIEU0YiS3oMuLvuUFoWSTBur81vFNYnzk"
+
+
 
 	SendToDiscord(discordWebhookDesarrollo, message)
 
