@@ -7,9 +7,12 @@ import (
 )
 
 func Routes(engine *gin.Engine) {
-	routes := engine.Group("webhook")
+
+	routes := engine.Group("pull_request")
+
 	{
-		routes.POST("pull_request/process", handlers.WebhookHandler)
-		routes.POST("workflow/process", handlers.WebhookHandler)
+		routes.POST("process", handlers.PullRequestEvent)
+		
 	}
+ //comentario
 }
