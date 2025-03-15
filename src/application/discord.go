@@ -8,12 +8,13 @@ import (
 	"os"
 )
 
-// Variables de entorno para los webhooks
+
 var (
 	discordWebhookDesarrollo = os.Getenv("DISCORD_WEBHOOK_DESARROLLO")
 	discordWebhookPruebas    = os.Getenv("DISCORD_WEBHOOK_PRUEBAS")
 	discordWebhookGeneral    = os.Getenv("DISCORD_WEBHOOK_GENERAL")
 )
+
 
 // Función para enviar mensaje a Discord
 func SendToDiscord(webhookURL, message string) {
