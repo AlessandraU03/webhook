@@ -1,52 +1,40 @@
 package application
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
-	"net/http"
 	domain "webhook/src/domain/value_objects"
 )
 
-const discordWebhookURL = "https://discord.com/api/webhooks/1346298566649315349/XfWtXCowZsmu9ek4bR_u2XCQgp5NxNAZ_TSTIN1PL5hJKrX_t7XDnZiFIb1dXEcRcVg3"
-
-func sendToDiscord(message string) {
-	payload := map[string]string{"content": message}
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("Error al serializar JSON para Discord: %v", err)
-		return
-	}
-
-	_, err = http.Post(discordWebhookURL, "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		log.Printf("Error al enviar mensaje a Discord: %v", err)
-	}
-}
-
+// ProcessPullRequest maneja las notificaciones de Pull Requests
 func ProcessPullRequest(payload []byte) int {
 	var eventPayload domain.PullRequestEventPayload
 
 	if err := json.Unmarshal(payload, &eventPayload); err != nil {
-		log.Printf("Error al deserializar payload: %v", err)
-		return 500
+		log.Printf("❌ Error al deserializar payload: %v", err)
+		return 400
 	}
 
-	if eventPayload.Action == "opened" {
-		user := eventPayload.PullRequest.User.Login
-		title := eventPayload.PullRequest.Title
-		url := eventPayload.PullRequest.URL
-
-		message := "**Nuevo Pull Request**\n" +
-			"👤 **Usuario:** " + user + "\n" +
-			"📌 **Título:** " + title + "\n" +
-			"🔗 **URL:** " + url
-
-		log.Println("Enviando mensaje a Discord...")
-		sendToDiscord(message)
-	} else {
-		log.Printf("Pull Request Action no es 'opened': %s", eventPayload.Action)
-	}
-
+	handlePullRequest(eventPayload)
 	return 200
+}
+
+func handlePullRequest(eventPayload domain.PullRequestEventPayload) {
+	user := eventPayload.PullRequest.User.Login
+	title := eventPayload.PullRequest.Title
+	url := eventPayload.PullRequest.URL
+	action := eventPayload.Action
+
+	message := fmt.Sprintf(
+		"📢 **Pull Request %s**\n👤 **Usuario:** %s\n📌 **Título:** %s\n🔗 **URL:** %s",
+		action, user, title, url,
+	)
+
+	sendToDiscord(discordWebhookDesarrollo, message)
+
+	// Si el PR se fusionó, también lo notificamos
+	if action == "closed" {
+		sendToDiscord(discordWebhookDesarrollo, "✅ **El PR ha sido fusionado exitosamente!**")
+	}
 }
