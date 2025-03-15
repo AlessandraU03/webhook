@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// WebhookHandler maneja los eventos de GitHub, como 'pull_request' y 'workflow_run'
 func WebhookHandler(ctx *gin.Context) {
 	eventType := ctx.GetHeader("X-GitHub-Event")
 	deliveryID := ctx.GetHeader("X-GitHub-Delivery")

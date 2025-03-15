@@ -7,7 +7,7 @@ import (
 	domain "webhook/src/domain/value_objects"
 )
 
-// ProcessPullRequest maneja las notificaciones de Pull Requests
+// Función que procesa los eventos de Pull Request
 func ProcessPullRequest(payload []byte) int {
 	var eventPayload domain.PullRequestEventPayload
 
@@ -20,6 +20,7 @@ func ProcessPullRequest(payload []byte) int {
 	return 200
 }
 
+// Función que maneja la notificación de Pull Request
 func handlePullRequest(eventPayload domain.PullRequestEventPayload) {
 	user := eventPayload.PullRequest.User.Login
 	title := eventPayload.PullRequest.Title
@@ -31,10 +32,20 @@ func handlePullRequest(eventPayload domain.PullRequestEventPayload) {
 		action, user, title, url,
 	)
 
-	sendToDiscord(discordWebhookDesarrollo, message)
+	// Enviar la notificación al webhook de desarrollo
+	if discordWebhookDesarrollo == "" {
+		log.Println("❌ URL del webhook de desarrollo no configurada.")
+		return
+	}
+    
+    const discordWebhookDesarrollo = "https://discord.com/api/webhooks/1350529029412749333/BF36oJ78qT91HQ_NZB46CuwNCpKenRjo0CgVIEU0YiS3oMuLvuUFoWSTBur81vFNYnzk"
 
-	// Si el PR se fusionó, también lo notificamos
+
+
+	SendToDiscord(discordWebhookDesarrollo, message)
+
+	// Si el PR ha sido fusionado, también se envía una notificación adicional
 	if action == "closed" {
-		sendToDiscord(discordWebhookDesarrollo, "✅ **El PR ha sido fusionado exitosamente!**")
+		SendToDiscord(discordWebhookDesarrollo, "✅ **El PR ha sido fusionado exitosamente!**")
 	}
 }

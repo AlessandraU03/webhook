@@ -7,9 +7,9 @@ import (
 )
 
 func Routes(engine *gin.Engine) {
-	routes := engine.Group("webhook")
+	routes := engine.Group("/github")
+
 	{
-		routes.POST("pull_request/process", handlers.WebhookHandler)
-		routes.POST("workflow/process", handlers.WebhookHandler)
+		routes.POST("/webhook", handlers.WebhookHandler) // Ruta para recibir los eventos del webhook
 	}
 }
