@@ -1,4 +1,4 @@
-package handlers
+package infraestructure
 
 import (
 	"webhook/src/infraestructure/handlers"
@@ -7,11 +7,9 @@ import (
 )
 
 func Routes(engine *gin.Engine) {
-
-	routes := engine.Group("pull_request")
-
+	routes := engine.Group("webhook")
 	{
-		routes.POST("process", handlers.PullRequestEvent)
+		routes.POST("pull_request/process", handlers.WebhookHandler)
+		routes.POST("workflow/process", handlers.WebhookHandler)
 	}
- //comentario
 }

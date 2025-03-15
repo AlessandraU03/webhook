@@ -17,7 +17,6 @@ type PullRequest struct {
 	User  User   `json:"user"`
 }
 
-
 type Branch struct {
 	Ref string `json:"ref"`
 	Sha string `json:"sha"`
@@ -33,4 +32,24 @@ type User struct {
 	ID    int    `json:"id"`
 	Type  string `json:"type"`
 	URL   string `json:"url"`
+}
+
+type WorkflowRunEventPayload struct {
+	Action      string      `json:"action"`
+	WorkflowRun WorkflowRun `json:"workflow_run"`
+	Workflow    Workflow    `json:"workflow"`
+	Repository  Repository  `json:"repository"`
+}
+
+type WorkflowRun struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	Status     string `json:"status"`
+	Conclusion string `json:"conclusion"`
+	HTMLURL    string `json:"html_url"`
+}
+
+type Workflow struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
