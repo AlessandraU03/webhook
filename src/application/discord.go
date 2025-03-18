@@ -3,21 +3,27 @@ package application
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 )
 
+// Función para enviar mensaje a Discord
+func SendToDiscord(webhookURL, message string) {
+	
+err := godotenv.Load()
+if err != nil {
+	return nil, fmt.Errorf("error al cargar el archivo .env: %v", err)
+}
 
 var (
-	discordWebhookDesarrollo = os.Getenv("DISCORD_WEBHOOK_DESARROLLO")
-	discordWebhookPruebas    = os.Getenv("DISCORD_WEBHOOK_PRUEBAS")
-	discordWebhookGeneral    = os.Getenv("DISCORD_WEBHOOK_GENERAL")
+	discordWebhookDesarrollo := os.Getenv("DISCORD_WEBHOOK_DESARROLLO")
+	discordWebhookPruebas    := os.Getenv("DISCORD_WEBHOOK_PRUEBAS")
+	discordWebhookGeneral    := os.Getenv("DISCORD_WEBHOOK_GENERAL")
 )
 
 
-// Función para enviar mensaje a Discord
-func SendToDiscord(webhookURL, message string) {
 	if webhookURL == "" {
 		log.Println("❌ No se ha configurado la URL del webhook.")
 		return
