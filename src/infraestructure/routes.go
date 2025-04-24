@@ -1,4 +1,4 @@
-package handlers
+package infraestructure
 
 import (
 	"webhook/src/infraestructure/handlers"
@@ -7,11 +7,9 @@ import (
 )
 
 func Routes(engine *gin.Engine) {
-
-	routes := engine.Group("pull_request")
+	routes := engine.Group("/github")
 
 	{
-		routes.POST("process", handlers.PullRequestEvent)
+		routes.POST("/webhook", handlers.WebhookHandler) // Ruta para recibir los eventos del webhook
 	}
- //comentario
 }

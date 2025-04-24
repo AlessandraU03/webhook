@@ -1,104 +1,51 @@
 package application
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
-	"net/http"
 	domain "webhook/src/domain/value_objects"
 )
 
-const discordWebhookURL = "https://discord.com/api/webhooks/1346298566649315349/XfWtXCowZsmu9ek4bR_u2XCQgp5NxNAZ_TSTIN1PL5hJKrX_t7XDnZiFIb1dXEcRcVg3"
-
-func sendToDiscord(message string) {
-    payload := map[string]string{"content": message}
-    payloadBytes, err := json.Marshal(payload)
-    if err != nil {
-        log.Printf("Error al serializar JSON: %v", err)
-        return
-    }
-
-    resp, err := http.Post(discordWebhookURL, "application/json", bytes.NewBuffer(payloadBytes))
-    if err != nil {
-        log.Printf("Error al enviar mensaje a Discord: %v", err)
-        return
-    }
-    defer resp.Body.Close()
-
-    log.Printf("Respuesta de Discord: %v", resp.Status)
-}
-
-
+// Función que procesa los eventos de Pull Request
 func ProcessPullRequest(payload []byte) int {
-    var eventPayload domain.PullRequestEventPayload
+	var eventPayload domain.PullRequestEventPayload
 
-    if err := json.Unmarshal(payload, &eventPayload); err != nil {
-        log.Printf("Error al deserializar payload: %v", err)
-        return 400
-    }
+	if err := json.Unmarshal(payload, &eventPayload); err != nil {
+		log.Printf("❌ Error al deserializar payload: %v", err)
+		return 400
+	}
 
-    if eventPayload.Action != "opened" && eventPayload.Action != "edited" {
-        log.Printf("Evento no compatible: %s", eventPayload.Action)
-        return 400
-    }
-
-    user := eventPayload.PullRequest.User.Login
-    title := eventPayload.PullRequest.Title
-    url := eventPayload.PullRequest.URL
-    comment := eventPayload.PullRequest.Body // Obtiene el comentario
-
-    message := "**Nuevo Pull Request**\n" +
-        "👤 **Usuario:** " + user + "\n" +
-        "📌 **Título:** " + title + "\n" +
-        "💬 **Comentario:** " + comment + "\n" + // Agregar comentario
-        "🔗 **URL:** " + url
-
-    log.Println("Enviando mensaje a Discord...")
-    sendToDiscord(message)
-
-    return 200
+	handlePullRequest(eventPayload)
+	return 200
 }
 
-func ProcessCommentEvent(payload []byte) int {
-    type CommentEventPayload struct {
-        Action  string `json:"action"`
-        Comment struct {
-            Body string `json:"body"`
-            User struct {
-                Login string `json:"login"`
-            } `json:"user"`
-        } `json:"comment"`
-        Issue struct {
-            PullRequest struct {
-                URL string `json:"url"`
-            } `json:"pull_request"`
-        } `json:"issue"`
-    }
+// Función que maneja la notificación de Pull Request
+func handlePullRequest(eventPayload domain.PullRequestEventPayload) {
+	user := eventPayload.PullRequest.User.Login
+	title := eventPayload.PullRequest.Title
+	url := eventPayload.PullRequest.URL
+	action := eventPayload.Action
 
-    var eventPayload CommentEventPayload
+	message := fmt.Sprintf(
+		"📢 **Pull Request %s**\n👤 **Usuario:** %s\n📌 **Título:** %s\n🔗 **URL:** %s",
+		action, user, title, url,
+	)
 
-    if err := json.Unmarshal(payload, &eventPayload); err != nil {
-        log.Printf("Error al deserializar payload de comentario: %v", err)
-        return 400
-    }
+	// Enviar la notificación al webhook de desarrollo
+	if discordWebhookDesarrollo == "" {
+		log.Println("❌ URL del webhook de desarrollo no configurada.")
+		return
+	}
+    
+    const discordWebhookDesarrollo = "https://discord.com/api/webhooks/1350529029412749333/BF36oJ78qT91HQ_NZB46CuwNCpKenRjo0CgVIEU0YiS3oMuLvuUFoWSTBur81vFNYnzk"
 
-    if eventPayload.Action != "created" {
-        log.Printf("Comentario no es nuevo: %s", eventPayload.Action)
-        return 400
-    }
 
-    user := eventPayload.Comment.User.Login
-    comment := eventPayload.Comment.Body
-    prURL := eventPayload.Issue.PullRequest.URL
 
-    message := "**Nuevo Comentario en Pull Request**\n" +
-        "👤 **Usuario:** " + user + "\n" +
-        "💬 **Comentario:** " + comment + "\n" +
-        "🔗 **URL del PR:** " + prURL
+	SendToDiscord(discordWebhookDesarrollo, message)
 
-    log.Println("Enviando comentario a Discord...")
-    sendToDiscord(message)
-
-    return 200
+	// Si el PR ha sido fusionado, también se envía una notificación adicional
+	if action == "closed" {
+		SendToDiscord(discordWebhookDesarrollo, "✅ **El PR ha sido fusionado exitosamente!**")
+	}
 }
-
